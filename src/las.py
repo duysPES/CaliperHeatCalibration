@@ -65,7 +65,7 @@ class CaliperPass:
                     start = idxs[i]
                     end = idxs[i + 1]
                 except IndexError:
-                    end = idxs[-1]
+                    continue
                 bowl_data = self.df[finger].to_numpy()[start:end]
                 self.data[finger]['preproc_data'][
                     f'bowlsize_{self.bowlsizes[i]}'] = bowl_data
