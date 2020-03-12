@@ -25,7 +25,6 @@ class CaliperPass:
             finger_np = self.df[finger].to_numpy()
             bowls = [0] + self.segment_bowls(
                 finger_np, threshold=50, to_skip=100) + [len(finger_np) - 1]
-            print(bowlsizes, bowls)
             if len(bowlsizes) != len(bowls) - 1:
                 raise IndexError(
                     f"Bowl idxs must match length of detected bowlsizes for finger: {finger}\nBowl Idx Length: {len(bowls)}\nBowlsizes Length: {len(bowlsizes)}"
@@ -55,7 +54,6 @@ class CaliperPass:
             if finger == "TEMP":
                 continue
             idxs = idxs['segments']
-            print(idxs)
             self.data[finger]['data'] = {}
             self.data[finger]['preproc_data'] = {}
 

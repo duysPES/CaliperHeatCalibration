@@ -31,7 +31,7 @@ class MTC:
             mtc += f"{bowlsize},{self.temp_lengths}\n"
 
             for temp in temps:
-                mtc += f"{temp:04},"
+                mtc += f"{FtoC(temp):04},"
             mtc += "\n"
 
             for finger in range(self.fingers):
@@ -39,8 +39,14 @@ class MTC:
                     fing_avg = self.passes[temp].data[f"R{finger+1:02}"][
                         'data'][f'bowlsize_{bowlsize}'].mean()
                     # print(finger + 1, f'bowlsize_{bowlsize}', fing_avg)
-                    break
+                    mtc += f"{int(fing_avg):04},"
 
+                mtc += "\n"
+
+        # for i, line in enumerate(mtc):
+        #     if line[-1] == ",":
+        #         mtc.pop()
+        # mtc = "".join(mtc)
         return mtc
 
 
