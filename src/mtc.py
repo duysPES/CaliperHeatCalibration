@@ -34,6 +34,11 @@ class MTC:
                 mtc += f"{FtoC(temp):04},"
             mtc += "\n"
 
+            for temp in temps:
+                temp_avg = self.passes[temp].data['TEMP']['data'].mean()
+                mtc += f"{int(temp_avg):04},"
+            mtc += "\n"
+
             for finger in range(self.fingers):
                 for temp in temps:
                     fing_avg = self.passes[temp].data[f"R{finger+1:02}"][
@@ -53,10 +58,31 @@ class MTC:
 if __name__ == "__main__":
     fnames = [
         "../examples/Gowell/93F-11019.LAS", "../examples/Gowell/71F-11019.LAS",
-        "../examples/Gowell/45F-11019.LAS", "../examples/Gowell/118F-11019.LAS"
+        "../examples/Gowell/45F-11019.LAS",
+        "../examples/Gowell/118F-11019.LAS",
+        "../examples/Gowell/144F-11019.LAS",
+        "../examples/Gowell/169F-11019.LAS",
+        "../examples/Gowell/194F-11019.LAS",
+        "../examples/Gowell/219F-11019.LAS",
+        "../examples/Gowell/244F-11019.LAS",
+        "../examples/Gowell/270F-11019.LAS",
+        "../examples/Gowell/295F-11019.LAS"
     ]
 
     mtc = MTC(fnames,
               fingers=24,
               bowlsizes=[47.6, 60.3, 76.2, 101.6, 127.0, 142.9, 152.4])
-    print(mtc.compile())
+    with open("results.mtc", "w") as f:
+        results = mtc.compile()
+        results = results.split("\n")
+        p = []
+        for r in results:
+            try:
+                if r[-1] == ",":
+                    p.append(r[:-1])
+                else:
+                    p.append(r)
+            except IndexError:
+                p.append(r[:-1])
+        results = "\n".join(p)
+        f.write(results)
