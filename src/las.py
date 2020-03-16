@@ -1,11 +1,16 @@
 import lasio
 import numpy as np
+import datetime
 
 
 class CaliperPass:
     def __init__(self, fname, fingers, bowlsizes, summary=False):
         self.fname = fname
-        self.las = lasio.read(fname)
+        try:
+            self.las = lasio.read(fname)
+        except ValueError as err:
+            print(err)
+            print("You must generate LAS file with wrapping off")
         self.df = self.las.df().dropna()
         self.bowlsizes = bowlsizes
         self.data = {}
@@ -43,7 +48,7 @@ class CaliperPass:
         self.clean_finger_data()
 
         if summary:
-            self.summarize()
+            self.summarize(log=True)
 
     def clean_finger_data(self):
         """
@@ -85,8 +90,9 @@ class CaliperPass:
         idxs = np.where(abs(temp.mean() - temp) > (2 * temp.std()))[0]
         self.data['TEMP']['data'] = np.delete(temp, idxs)
 
-    def summarize(self):
-        print("Summary:")
+    def summarize(self, log=False):
+        summary_str = ""
+        summary_str += f"\nSummary [{self.fname}]: \n"
         orig_v = 0
         data_v = 0
         for k, v in self.data.items():
@@ -98,13 +104,18 @@ class CaliperPass:
             # print(k, data, orig, f"{(orig - data) / orig * 100}%")
             orig_v += orig
             data_v += data
-        print(
-            f"\tData Reduction (Fingers): {(orig_v - data_v) / orig_v * 100}%")
+
         temp_data = len(self.data['TEMP']['data'])
         temp_pre = len(self.data['TEMP']['preproc_data'])
-        print(
-            f"\tData Reduction (Temperature): {(temp_pre-temp_data)/temp_pre*100}%"
-        )
+
+        summary_str += f"\tData Reduction (Fingers): {(orig_v - data_v) / orig_v * 100}% [{orig_v - data_v}]\n"
+        summary_str += f"\tData Reduction (Temperature): {(temp_pre-temp_data)/temp_pre*100}% [{orig_v - data_v}]"
+
+        if log:
+            with open("log.out", "a") as f:
+                now = datetime.datetime.today().ctime()
+                f.write(now + "\n" + summary_str + "\n")
+        print(summary_str)
 
     def segment_bowls(self, arr, threshold, to_skip):
         skip = False
