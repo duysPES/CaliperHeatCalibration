@@ -15,6 +15,22 @@ def to_file(fname, pyobj):
             f.write(str(pyobj))
 
 
+def do_log():
+    answer = sg.PopupYesNo("Do you want to view log?")
+    if answer.lower() == "yes":
+        with open(Path("log.out").resolve(), "r") as f:
+            contents = f.read()
+        layout = [[sg.Multiline(contents, disabled=True, size=(200, 600))]]
+        window = sg.Window("Output log", layout=layout, size=(500, 500))
+        window.finalize()
+        while True:
+            e, v = window.read()
+
+            if e is None:
+                break
+        window.close()
+
+
 def parse_bowl_sizes(sizes: str) -> list:
     sizes = sizes.split(",")
     return [float(i) for i in sizes]
@@ -32,10 +48,16 @@ if __name__ == "__main__":
                              key="file_browser")
           ]]
 
-    rc = [[sg.Checkbox(
-        "MTC",
-        key="gowell",
-    )], [sg.Checkbox("PTC", key="probe")]]
+    rc = [[
+        sg.Checkbox("MTC", key="gowell", default=True, change_submits=True)
+    ], [sg.Checkbox("PTC", key="probe", change_submits=True)],
+          [
+              sg.Text("Fingers: "),
+              sg.Combo(values=[24, 40, 56],
+                       key="arms",
+                       size=(2, 1),
+                       default_value=24)
+          ]]
 
     layout = [[sg.Column(layout=lc), sg.Column(layout=rc)]]
     window = sg.Window("Heat Cal Calc", layout=layout)
@@ -46,16 +68,16 @@ if __name__ == "__main__":
         if event in (None, "Quit"):
             break
 
+        if event in ("gowell", "probe"):
+            if event == "gowell":
+                window['gowell'].Update(value=True)
+                window['probe'].Update(value=False)
+            elif event == "probe":
+                window['gowell'].Update(value=False)
+                window['probe'].Update(value=True)
+
         if event == "file_browser":
-            if values["gowell"] is not True and values['probe'] is not True:
-                sg.PopupAutoClose(
-                    "You must select either PTC or MTC file to generate")
-                continue
-
-            if values["gowell"] is True and values['probe'] is True:
-                sg.PopupAutoClose("You can only select one type.")
-                continue
-
+            fingers = int(values['arms'])
             bowlsizes = parse_bowl_sizes(values["bowlsizes"])
             if values['gowell'] is True:
                 answer = sg.PopupYesNo("Generate MTC File?")
@@ -63,13 +85,11 @@ if __name__ == "__main__":
                     sg.PopupNonBlocking("Generating file...please wait",
                                         auto_close=True)
                     files = values[event].split(";")
-                    mtc = MTC(files, fingers=24, bowlsizes=bowlsizes)
+                    mtc = MTC(files, fingers=fingers, bowlsizes=bowlsizes)
                     results = mtc.compile()
                     results = mtc.clean(results)
                     to_file("results.mtc", results)
-                    sg.PopupOK(
-                        "Finished Conversion. Check 'log.out' for more information",
-                        keep_on_top=True)
+                    do_log()
                     break
             elif values['probe'] is True:
                 answer = sg.PopupYesNo("Generate PTC File?")
@@ -77,10 +97,8 @@ if __name__ == "__main__":
                     sg.PopupNonBlocking("Generating file...please wait",
                                         auto_close=True)
                     files = values[event].split(";")
-                    ptc = PTC(files, fingers=24, bowlsizes=bowlsizes)
+                    ptc = PTC(files, fingers=fingers, bowlsizes=bowlsizes)
                     ptc.compile()
                     to_file("results.ptc", ptc)
-                    sg.PopupOK(
-                        "Finished Conversion. Check 'log.out' for more information",
-                        keep_on_top=True)
+                    do_log()
                     break

@@ -3,6 +3,7 @@ from utils import FtoC
 import datetime
 import re
 from configparser import ConfigParser, RawConfigParser
+from pathlib import Path
 
 
 def mm2in(mm):
@@ -29,6 +30,8 @@ class Parser(ConfigParser):
 
 class HeatCalibration:
     def __init__(self, fnames, fingers, bowlsizes):
+        with open(Path("log.out").resolve(), "w") as f:
+            pass
         bowlsizes.sort()
         self.passes = {}
         self.temp_lengths = len(fnames)
