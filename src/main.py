@@ -33,7 +33,7 @@ def do_log():
 
 def parse_bowl_sizes(sizes: str) -> list:
     sizes = sizes.split(",")
-    return [float(i) for i in sizes]
+    return [float(i) for i in [j for j in sizes if j]]
 
 
 if __name__ == "__main__":

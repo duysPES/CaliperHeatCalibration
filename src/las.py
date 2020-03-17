@@ -1,6 +1,8 @@
 import lasio
 import numpy as np
 import datetime
+import sys
+import PySimpleGUI as pg
 
 
 class CaliperPass:
@@ -27,13 +29,17 @@ class CaliperPass:
         # and construct dictionary to hold finger position with idxes of bowl transitions
         for idx, finger in enumerate(self.finger_id):
             self.data[finger] = {}
-            finger_np = self.df[finger].to_numpy()
+            try:
+                finger_np = self.df[finger].to_numpy()
+            except KeyError:
+                pg.PopupError("Number of arms do not match those in .LAS file")
+                sys.exit(-1)
             bowls = [0] + self.segment_bowls(
                 finger_np, threshold=50, to_skip=100) + [len(finger_np) - 1]
             if len(bowlsizes) != len(bowls) - 1:
-                raise IndexError(
-                    f"Bowl idxs must match length of detected bowlsizes for finger: {finger}\nBowl Idx Length: {len(bowls)}\nBowlsizes Length: {len(bowlsizes)}"
-                )
+                errmsg = f"Number of bowlsizes does not match findings in data for {finger}\nBowlsizes: {bowlsizes}"
+                pg.PopupError(errmsg)
+                sys.exit(-1)
             self.data[finger]['segments'] = bowls
 
         # do the same thing as above but use temp
