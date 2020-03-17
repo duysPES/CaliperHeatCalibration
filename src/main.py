@@ -15,13 +15,13 @@ def to_file(fname, pyobj):
             f.write(str(pyobj))
 
 
-def do_log():
-    answer = sg.PopupYesNo("Do you want to view log?")
+def do_peek(fname):
+    answer = sg.PopupYesNo("Do you want to view file?")
     if answer.lower() == "yes":
-        with open(Path("log.out").resolve(), "r") as f:
+        with open(Path(fname).resolve(), "r") as f:
             contents = f.read()
         layout = [[sg.Multiline(contents, disabled=True, size=(200, 600))]]
-        window = sg.Window("Output log", layout=layout, size=(500, 500))
+        window = sg.Window("File Preview", layout=layout, size=(500, 500))
         window.finalize()
         while True:
             e, v = window.read()
@@ -89,8 +89,8 @@ if __name__ == "__main__":
                     results = mtc.compile()
                     results = mtc.clean(results)
                     to_file("results.mtc", results)
-                    do_log()
-                    break
+                    do_peek("results.mtc")
+
             elif values['probe'] is True:
                 answer = sg.PopupYesNo("Generate PTC File?")
                 if answer.lower() == "yes":
@@ -100,5 +100,4 @@ if __name__ == "__main__":
                     ptc = PTC(files, fingers=fingers, bowlsizes=bowlsizes)
                     ptc.compile()
                     to_file("results.ptc", ptc)
-                    do_log()
-                    break
+                    do_peek("results.ptc")
