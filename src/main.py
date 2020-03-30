@@ -5,7 +5,7 @@ import datetime
 
 
 def to_file(fname, pyobj):
-    p = Path(f"../{fname}").resolve()
+    p = Path(f"{fname}").resolve()
 
     # store in parent directory
     if isinstance(pyobj, PTC):
